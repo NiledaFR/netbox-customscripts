@@ -77,34 +77,32 @@ class NewSite(Script):
     def run(self, data, commit):
 
         # Create the new site
-        if data['code_site']:
-            site = Site(
-                name=data['code_site']+" - "+data['nom_du_site'],
-                slug=slugify(data['nom_du_site']),
-                status='active',
-                region=data['affectation_du_site'],
-                physical_address=data['adresse_postale'],
-                custom_field_data=dict(TYPE_DE_SITE=data['type_de_site'],TYPE_INTERCO=data['type_d_interco'])
-            )
-            site.full_clean()
-            site.save()
-            typedesite=site.cf.get('TYPE_INTERCO')
-            self.log_success(f"Created new site: {site}, avec comme type {typedesite}")
+        site = Site(
+            name=data['code_site']+" - "+data['nom_du_site'],
+            slug=slugify(data['nom_du_site']),
+            status='active',
+            region=data['affectation_du_site'],
+            physical_address=data['adresse_postale'],
+            custom_field_data=dict(TYPE_DE_SITE=data['type_de_site'],TYPE_INTERCO=data['type_d_interco'])
+        )
+        site.full_clean()
+        site.save()
+        typedesite=site.cf.get('TYPE_INTERCO')
+        self.log_success(f"Created new site: {site}, avec comme type {typedesite}")
 
         # Create L3 Equipement
         l3_role = DeviceRole.objects.get(name='Firewall')
 
-        if data['model_niveau3']:
-            firewall = Device(
-                device_type=data['model_niveau3'],
-                name=data['code_site']+"-FW01",
-                status='active',
-                role=l3_role,
-                site=site
-            )
-            firewall.full_clean()
-            firewall.save()
-            self.log_success(f"Created firewall: {firewall}")
+        firewall = Device(
+            device_type=data['model_niveau3'],
+            name=data['code_site']+"-FW01",
+            status='active',
+            role=l3_role,
+            site=site
+        )
+        firewall.full_clean()
+        firewall.save()
+        self.log_success(f"Created firewall: {firewall}")
 
         # Create Prefixes
         Prefix25Reserved=Prefix.objects.filter(role=Role.objects.get(name="Sites Distants - Infra Cible - 25").id)
