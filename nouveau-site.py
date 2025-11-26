@@ -3,6 +3,7 @@ from django.utils.text import slugify
 
 from dcim.choices import DeviceStatusChoices, SiteStatusChoices
 from dcim.models import Device, DeviceRole, DeviceType, Site, Region
+from extras.models import CustomField, CustomFieldChoiceSet
 
 
 class NewSite(Script):
@@ -26,12 +27,12 @@ class NewSite(Script):
 
     site_type = ObjectVar(
         description="Type de site",
-        model=cf_TYPE_DE_SITE
+        model=CustomField
     )
 
     interco_type = ObjectVar(
         description="Type d'interco",
-        model=cf_TYPE_INTERCO
+        model=CustomField
     )
     
 
