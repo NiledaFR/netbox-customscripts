@@ -35,7 +35,7 @@ class NewSite(Script):
         choices=(('ROUTAGE','Routage'),('IPSEC','IPSec'),('L2','L2'))
     )
     
-    region = ObjectVar(
+    palo_model = ObjectVar(
         description="Modèle de Palo",
         model=DeviceType,
         query_params={
