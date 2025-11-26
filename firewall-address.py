@@ -17,13 +17,12 @@ class LinkFirewallToAddress(Script):
 			site=firewall.site
 			prefixes=Prefix.objects.filter(site=site)
 			for prefix in prefixes:
-				allIps=prefix.get_child_ips()
-				self.log_success(f"Created new switch: {prefix}")
-				lastIpInPrefix=allIps[len(allIps)-1]
+				self.log_success(f"Currently active on prefix: {prefix}")
+				lastIpInPrefix=prefix.prefix.broadcast-1
 				lastIpInPrefix.snapshot()
 				if "PRIV-" in prefix.vlan.group.name:
 					if prefix.vlan.group.name == "PRIV-MGMT":
-						preLastIpInPrefix=allIps[len(allIps)-2]
+						preLastIpInPrefix=lastIpInPrefix-1
 						preLastIpInPrefix.snapshot()
 						firewall.snapshot()
 						interface=firewall.interfaces.get(name="management")
