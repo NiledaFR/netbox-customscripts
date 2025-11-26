@@ -115,7 +115,11 @@ class NewSite(Script):
                 for availablePrefix in list(availablePrefixList.subnet(25)):
                     list25AvailablePrefixes.append(availablePrefix)
 
-        return str(list25AvailablePrefixes)
+        nb_prefix=0
+        for vlan in data['vlans_en_25']:
+            self.log_success(f"Create prefix {list25AvailablePrefixes[nb_prefix]} for vlan {vlan}")
+
+        
         # # Create routers
         # router_role = DeviceRole.objects.get(name='WAN Router')
         # for i in range(1, data['router_count'] + 1):
