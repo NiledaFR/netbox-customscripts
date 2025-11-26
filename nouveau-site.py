@@ -69,12 +69,12 @@ class NewSite(Script):
             slug=slugify(data['nom_du_site']),
             status='active',
             region=data['affectation_du_site'],
-            physical_address=data['adresse_postale']
+            physical_address=data['adresse_postale'],
+            custom_field_data=dict(TYPE_DE_SITE=data['type_de_site'],TYPE_INTERCO=data['type_d_interco'])
         )
-        typedesite=data['type_de_site']
-        site.cf.update(cf_TYPE_DE_SITE=data['type_de_site'])
-        site.cf.update(cf_TYPE_INTERCO=data['type_d_interco'])
+        site.full_clean()
         site.save()
+        typedesite=site.cf.get('TYPE_INTERCO')
         self.log_success(f"Created new site: {site}, avec comme type {typedesite}")
 
         # # Create access switches
