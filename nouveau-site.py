@@ -4,6 +4,7 @@ from django.utils.text import slugify
 from dcim.choices import DeviceStatusChoices, SiteStatusChoices
 from dcim.models import Device, DeviceRole, DeviceType, Site, Region, Manufacturer
 from extras.choices import CustomFieldTypeChoices
+from ipam.models import VLAN
 
 
 class NewSite(Script):
@@ -41,6 +42,16 @@ class NewSite(Script):
         query_params={
             'manufacturer_name': 'Palo Alto'
         }
+    )
+
+    vlans_in_25 = MultiObjectVar(
+        description="VLAN avec un subnet en 25",
+        model=VLAN
+    )
+
+    vlans_in_23 = MultiObjectVar(
+        description="VLAN avec un subnet en 23",
+        model=VLAN
     )
 
     def run(self, data, commit):
