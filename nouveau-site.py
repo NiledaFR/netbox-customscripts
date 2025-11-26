@@ -27,13 +27,13 @@ class NewSite(Script):
 
     site_type = ChoiceVar(
         description="Type de site",
-        model=CustomFieldTypeChoices
+        choices=(('OUI','Intermédiaire (avec backbone)'),('NON','Final (sans backbone)'))
     )
 
-    # interco_type = ChoiceVar(
-    #     description="Type d'interco",
-    #     model=CustomFieldTypeChoices
-    # )
+    interco_type = ChoiceVar(
+        description="Type d'interco",
+        choices=(('ROUTAGE','Routage'),('IPSEC','IPSec'),('L2','L2'))
+    )
     
 
     def run(self, data, commit):
