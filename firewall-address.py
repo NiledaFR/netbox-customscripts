@@ -24,6 +24,11 @@ class LinkFirewallToAddress(Script):
 					lastIpInPrefix=allIps[len(allIps)-1]
 					if "PRIV-" in prefix.vlan.group.name:
 						if prefix.vlan.group.name == "PRIV-MGMT":
+							preLastIpInPrefix=allIps[len(allIps)-2]
+							interface=firewall.interfaces.get(name="management")
+							preLastIpInPrefix.assigned_object = interface
+							preLastIpInPrefix.save()
+							firewall.oob_ip_id = preLastIpInPrefix.id
 							interface=firewall.interfaces.get(name="ethernet1/7")
 						else:
 							interface=firewall.interfaces.get(name="ethernet1/3")
