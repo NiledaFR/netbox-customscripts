@@ -18,6 +18,7 @@ class LinkFirewallToAddress(Script):
 			prefixes=Prefix.objects.filter(site=site)
 			for prefix in prefixes:
 				allIps=prefix.get_child_ips()
+				self.log_success(f"Created new switch: {prefix}")
 				lastIpInPrefix=allIps[len(allIps)-1]
 				lastIpInPrefix.snapshot()
 				if "PRIV-" in prefix.vlan.group.name:
