@@ -11,38 +11,46 @@ class NewSite(Script):
 
     class Meta:
         name = "Nouveau Site"
-        description = "Permet de créer un nouveau site"
+        description = "Permet de créer un nouveau site",
+        required=False
 
     code_site = StringVar(
-        description="Code du nouveau site"
+        description="Code du nouveau site",
+        required=False
     )
 
     nom_du_site = StringVar(
-        description="Nom du nouveau site"
+        description="Nom du nouveau site",
+        required=False
     )
 
     affectation_du_site = ObjectVar(
         description="Quel type de site?",
-        model=Region
+        model=Region,
+        required=False
     )
     
     adresse_postale = StringVar(
-        description="Adresse postale du nouveau site"
+        description="Adresse postale du nouveau site",
+        required=False
     )
 
     type_de_site = ChoiceVar(
         description="Type de site",
-        choices=(('OUI','Intermédiaire (avec backbone)'),('NON','Final (sans backbone)'))
+        choices=(('OUI','Intermédiaire (avec backbone)'),('NON','Final (sans backbone)')),
+        required=False
     )
 
     type_d_interco = ChoiceVar(
         description="Type d'interco",
-        choices=(('ROUTAGE','Routage'),('IPSEC','IPSec'),('L2','L2'))
+        choices=(('ROUTAGE','Routage'),('IPSEC','IPSec'),('L2','L2')),
+        required=False
     )
 
     fabricant_niveau3 = ObjectVar(
         description="Fabricant du device de niveau 3",
-        model=Manufacturer
+        model=Manufacturer,
+        required=False
     )
     
     model_niveau3 = ObjectVar(
@@ -50,7 +58,8 @@ class NewSite(Script):
         model=DeviceType,
         query_params={
             'manufacturer_id': '$fabricant_niveau3'
-        }
+        },
+        required=False
     )
 
     vlans_en_25 = MultiObjectVar(
@@ -68,32 +77,34 @@ class NewSite(Script):
     def run(self, data, commit):
 
         # Create the new site
-        site = Site(
-            name=data['code_site']+" - "+data['nom_du_site'],
-            slug=slugify(data['nom_du_site']),
-            status='active',
-            region=data['affectation_du_site'],
-            physical_address=data['adresse_postale'],
-            custom_field_data=dict(TYPE_DE_SITE=data['type_de_site'],TYPE_INTERCO=data['type_d_interco'])
-        )
-        site.full_clean()
-        site.save()
-        typedesite=site.cf.get('TYPE_INTERCO')
-        self.log_success(f"Created new site: {site}, avec comme type {typedesite}")
+        if data['code_site'] != "":
+            site = Site(
+                name=data['code_site']+" - "+data['nom_du_site'],
+                slug=slugify(data['nom_du_site']),
+                status='active',
+                region=data['affectation_du_site'],
+                physical_address=data['adresse_postale'],
+                custom_field_data=dict(TYPE_DE_SITE=data['type_de_site'],TYPE_INTERCO=data['type_d_interco'])
+            )
+            site.full_clean()
+            site.save()
+            typedesite=site.cf.get('TYPE_INTERCO')
+            self.log_success(f"Created new site: {site}, avec comme type {typedesite}")
 
         # Create L3 Equipement
         l3_role = DeviceRole.objects.get(name='Firewall')
 
-        firewall = Device(
-            device_type=data['model_niveau3'],
-            name=data['code_site']+"-FW01",
-            status='active',
-            role=l3_role,
-            site=site
-        )
-        firewall.full_clean()
-        firewall.save()
-        self.log_success(f"Created firewall: {firewall}")
+        if data['model_niveau3'] != ""
+            firewall = Device(
+                device_type=data['model_niveau3'],
+                name=data['code_site']+"-FW01",
+                status='active',
+                role=l3_role,
+                site=site
+            )
+            firewall.full_clean()
+            firewall.save()
+            self.log_success(f"Created firewall: {firewall}")
 
         # Create Prefixes
         Prefix25Reserved=Prefix.objects.filter(role=Role.objects.get(name="Sites Distants - Infra Cible - 25").id)
