@@ -91,20 +91,20 @@ class NewSite(Script):
             typedesite=site.cf.get('TYPE_INTERCO')
             self.log_success(f"Created new site: {site}, avec comme type {typedesite}")
 
-        # Create L3 Equipement
-        l3_role = DeviceRole.objects.get(name='Firewall')
+            # Create L3 Equipement
+            l3_role = DeviceRole.objects.get(name='Firewall')
 
-        if data['model_niveau3'] != "":
-            firewall = Device(
-                device_type=data['model_niveau3'],
-                name=data['code_site']+"-FW01",
-                status='active',
-                role=l3_role,
-                site=site
-            )
-            firewall.full_clean()
-            firewall.save()
-            self.log_success(f"Created firewall: {firewall}")
+            if data['model_niveau3'] != "":
+                firewall = Device(
+                    device_type=data['model_niveau3'],
+                    name=data['code_site']+"-FW01",
+                    status='active',
+                    role=l3_role,
+                    site=site
+                )
+                firewall.full_clean()
+                firewall.save()
+                self.log_success(f"Created firewall: {firewall}")
 
         # Create Prefixes
         Prefix25Reserved=Prefix.objects.filter(role=Role.objects.get(name="Sites Distants - Infra Cible - 25").id)
