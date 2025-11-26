@@ -19,9 +19,9 @@ class LinkFirewallToAddress(Script):
 			for prefix in prefixes:
 				self.log_success(f"Currently active on prefix: {prefix}")
 				lastIpInPrefix=(prefix.prefix.broadcast-1).format()+"/"+str(prefix.mask_length)
-				check_exist=ipam.IPAddress.objects.filter(address=lastIpInPrefix)
+				check_exist=IPAddress.objects.filter(address=lastIpInPrefix)
 				if len(check_exist) == 0:
-					lastIpInPrefix=ipam.IPAddress(address=lastIpInPrefix, status="active", dns_name=firewall.name, description=firewall.device_type.model)
+					lastIpInPrefix=IPAddress(address=lastIpInPrefix, status="active", dns_name=firewall.name, description=firewall.device_type.model)
 					lastIpInPrefix.full_clean()
 					lastIpInPrefix.save()
 				else:
@@ -29,9 +29,9 @@ class LinkFirewallToAddress(Script):
 				if "PRIV-" in prefix.vlan.group.name:
 					if prefix.vlan.group.name == "PRIV-MGMT":
 						preLastIpInPrefix=(prefix.prefix.broadcast-2).format()+"/"+str(prefix.mask_length)
-						check_exist=ipam.IPAddress.objects.filter(address=preLastIpInPrefix)
+						check_exist=IPAddress.objects.filter(address=preLastIpInPrefix)
 						if len(check_exist) == 0:
-							preLastIpInPrefix=ipam.IPAddress(address=preLastIpInPrefix, status="active", dns_name=firewall.name+"-oob", description=firewall.device_type.model)
+							preLastIpInPrefix=IPAddress(address=preLastIpInPrefix, status="active", dns_name=firewall.name+"-oob", description=firewall.device_type.model)
 							preLastIpInPrefix.full_clean()
 							preLastIpInPrefix.save()
 						else:
