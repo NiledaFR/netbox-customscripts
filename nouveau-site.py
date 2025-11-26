@@ -38,6 +38,7 @@ class NewSite(Script):
 
     def run(self, data, commit):
 
+        print("OK")
         # # Create the new site
         # site = Site(
         #     name=data['site_name'],
