@@ -19,5 +19,5 @@ class LinkFirewallToAddress(Script):
 				prefixes=Prefix.objects.filter(site=site)
 				for prefix in prefixes:
 					allIps=prefix.get_child_ips()
-					lastIpInPrefix=allIps[len(allIps)-2]
+					lastIpInPrefix=allIps[len(allIps)-1]
 					self.log_success(f"prefix found for site {site}: {prefix.prefix}, last ip is {lastIpInPrefix}")
