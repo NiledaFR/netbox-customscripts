@@ -111,8 +111,9 @@ class NewSite(Script):
         list25AvailablePrefixes = []
         for prefix in Prefix25Reserved:
             availablePrefixes = prefix.get_available_prefixes()
-            for availablePrefix in availablePrefixes.iter_cidrs():
-                list25AvailablePrefixes.append(list(availablePrefix.subnet(25)))
+            for availablePrefixList in availablePrefixes.iter_cidrs():
+                for availablePrefix in list(availablePrefixList.subnet(25)):
+                    list25AvailablePrefixes.append(availablePrefix)
 
         return str(list25AvailablePrefixes[0])
         # # Create routers
