@@ -2,7 +2,7 @@ from extras.scripts import *
 from django.utils.text import slugify
 
 from dcim.choices import DeviceStatusChoices, SiteStatusChoices
-from dcim.models import Device, DeviceRole, DeviceType, Site, Region
+from dcim.models import Device, DeviceRole, DeviceType, Site, Region, Manufacturer
 from extras.choices import CustomFieldTypeChoices
 
 
@@ -35,6 +35,12 @@ class NewSite(Script):
         choices=(('ROUTAGE','Routage'),('IPSEC','IPSec'),('L2','L2'))
     )
     
+    palo = Manufacturer.objects.get(name="Palo Alto")
+    palo_models = DeviceType.objects.filter(manufacturer=palo.id)
+    region = ObjectVar(
+        description="Quel type de site?",
+        model=palo_models
+    )
 
     def run(self, data, commit):
 
