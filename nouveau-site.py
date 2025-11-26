@@ -100,7 +100,7 @@ class NewSite(Script):
         list25AvailablePrefixes = []
         for prefix in Prefix25Reserved:
             availablePrefixes = prefix.get_available_prefixes()
-            for availablePrefix in availablePrefixes.iter_cidr():
+            for availablePrefix in availablePrefixes.iter_cidrs():
                 list25AvailablePrefixes.append(availablePrefix.subnet(25))
 
         return list25AvailablePrefixes
