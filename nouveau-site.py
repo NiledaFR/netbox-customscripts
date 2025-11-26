@@ -51,12 +51,14 @@ class NewSite(Script):
 
     vlans_en_25 = MultiObjectVar(
         description="VLAN avec un subnet en 25",
-        model=VLAN
+        model=VLAN,
+        required=False
     )
 
     vlans_en_23 = MultiObjectVar(
         description="VLAN avec un subnet en 23",
-        model=VLAN
+        model=VLAN,
+        required=False
     )
 
     def run(self, data, commit):
