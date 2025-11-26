@@ -13,35 +13,35 @@ class NewSite(Script):
         name = "Nouveau Site"
         description = "Permet de créer un nouveau site"
 
-    site_name = StringVar(
+    nom_du_site = StringVar(
         description="Nom du nouveau site"
     )
 
-    region = ObjectVar(
+    affectation_du_site = ObjectVar(
         description="Quel type de site?",
         model=Region
     )
     
-    site_address = StringVar(
+    adresse_postale = StringVar(
         description="Adresse postale du nouveau site"
     )
 
-    site_type = ChoiceVar(
+    type_de_site = ChoiceVar(
         description="Type de site",
         choices=(('OUI','Intermédiaire (avec backbone)'),('NON','Final (sans backbone)'))
     )
 
-    interco_type = ChoiceVar(
+    type_d_interco = ChoiceVar(
         description="Type d'interco",
         choices=(('ROUTAGE','Routage'),('IPSEC','IPSec'),('L2','L2'))
     )
 
-    manufacturer = ObjectVar(
+    fabricant_niveau3 = ObjectVar(
         description="Fabricant du device de niveau 3",
         model=Manufacturer
     )
     
-    l3_model = ObjectVar(
+    model_niveau3 = ObjectVar(
         description="Modèle du device de niveau 3",
         model=DeviceType,
         query_params={
@@ -49,12 +49,12 @@ class NewSite(Script):
         }
     )
 
-    vlans_in_25 = MultiObjectVar(
+    vlans_en_25 = MultiObjectVar(
         description="VLAN avec un subnet en 25",
         model=VLAN
     )
 
-    vlans_in_23 = MultiObjectVar(
+    vlans_en_23 = MultiObjectVar(
         description="VLAN avec un subnet en 23",
         model=VLAN
     )
