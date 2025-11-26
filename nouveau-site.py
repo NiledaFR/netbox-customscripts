@@ -35,8 +35,8 @@ class NewSite(Script):
         choices=(('ROUTAGE','Routage'),('IPSEC','IPSec'),('L2','L2'))
     )
     
-    palo = Manufacturer.objects.get(name="Palo Alto")
-    palo_models = DeviceType.objects.filter(manufacturer=palo.id)
+    palo = Manufacturer.get(name="Palo Alto")
+    palo_models = DeviceType.filter(manufacturer=palo.id)
     region = ObjectVar(
         description="Quel type de site?",
         model=palo_models
