@@ -29,6 +29,6 @@ class LinkFirewallToAddress(Script):
 							interface=firewall.interfaces.get(name="ethernet1/3")
 					if "PUB-" in prefix.vlan.group.name:
 						interface=firewall.interfaces.get(name="ethernet1/5")
-					lastIpInPrefix.assigned_obj = interface
+					lastIpInPrefix.assigned_object = interface
 					lastIpInPrefix.save()
 					self.log_success(f"last ip is {lastIpInPrefix} assigned to {interface}")
