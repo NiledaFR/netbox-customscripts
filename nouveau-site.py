@@ -2,46 +2,38 @@ from extras.scripts import *
 from django.utils.text import slugify
 
 from dcim.choices import DeviceStatusChoices, SiteStatusChoices
-from dcim.models import Device, DeviceRole, DeviceType, Site
+from dcim.models import Device, DeviceRole, DeviceType, Site, Region
 
 
-class NewBranchScript(Script):
+class NewSite(Script):
 
     class Meta:
-        name = "New Branch"
-        description = "Provision a new branch site"
+        name = "Nouveau Site"
+        description = "Permet de créer un nouveau site"
 
     site_name = StringVar(
-        description="Name of the new site"
+        description="Nom du nouveau site"
     )
-    switch_count = IntegerVar(
-        description="Number of access switches to create"
+
+    region = ObjectVar(
+        description="Quel type de site?",
+        model=Region
     )
-    switch_model = ObjectVar(
-        description="Access switch model",
-        model=DeviceType
+    
+    site_address = StringVar(
+        description="Adresse postale du nouveau site"
     )
-    router_count = IntegerVar(
-        description="Number of routers to create"
+
+    site_type = ObjectVar(
+        description="Type de site",
+        model=cf_TYPE_DE_SITE
     )
-    router_model = ObjectVar(
-        description="Router model",
-        model=DeviceType
+
+    interco_type = ObjectVar(
+        description="Type d'interco",
+        model=cf_TYPE_INTERCO
     )
-    ap_count = IntegerVar(
-        description="Number of APs to create"
-    )
-    ap_model = ObjectVar(
-        description="AP model",
-        model=DeviceType
-    )
-    server_count = IntegerVar(
-        description="Number of servers to create"
-    )
-    server_model = ObjectVar(
-        description="Server model",
-        model=DeviceType
-    )
+    
 
     def run(self, data, commit):
 
