@@ -35,10 +35,12 @@ class NewSite(Script):
         choices=(('ROUTAGE','Routage'),('IPSEC','IPSec'),('L2','L2'))
     )
     
-    palo_models = DeviceType.objects.filter(manufacturer=264)
     region = ObjectVar(
-        description="Quel type de site?",
-        model=palo_models
+        description="Modèle de Palo",
+        model=DeviceType,
+        query_params={
+            'manufacturer_name': 'Palo Alto'
+        }
     )
 
     def run(self, data, commit):
