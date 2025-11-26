@@ -40,7 +40,7 @@ class NewSite(Script):
         description="Modèle de Palo",
         model=DeviceType,
         query_params={
-            'manufacturer_name': 'Palo Alto'
+            'manufacturer__name': 'Palo Alto'
         }
     )
 
