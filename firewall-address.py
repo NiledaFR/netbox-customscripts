@@ -17,5 +17,5 @@ class LinkFirewallToAddress(Script):
             if firewall.name == "ANA-FW01":
                 site=firewall.site
                 prefixes=Prefix.objects.filter(site=site)
-                    for prefix in prefixes
-                        self.log_success(f"prefix found for site {site}: {prefix.prefix}")
+				for prefix in prefixes
+						self.log_success(f"prefix found for site {site}: {prefix.prefix}")
