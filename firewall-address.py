@@ -14,27 +14,26 @@ class LinkFirewallToAddress(Script):
 		devicerole=DeviceRole.objects.filter(name="Firewall")[0]
 		firewalls=Device.objects.filter(role=devicerole.id)
 		for firewall in firewalls:
-			if firewall.name == "ANA-FW01":
-				site=firewall.site
-				prefixes=Prefix.objects.filter(site=site)
-				for prefix in prefixes:
-					self.log_success(f"prefix found for site {site}: {prefix.prefix}")
-					self.log_success(f"vlan is: {prefix.vlan}")
-					allIps=prefix.get_child_ips()
-					lastIpInPrefix=allIps[len(allIps)-1]
-					if "PRIV-" in prefix.vlan.group.name:
-						if prefix.vlan.group.name == "PRIV-MGMT":
-							preLastIpInPrefix=allIps[len(allIps)-2]
-							interface=firewall.interfaces.get(name="management")
-							preLastIpInPrefix.assigned_object = interface
-							preLastIpInPrefix.save()
-							firewall.oob_ip_id = preLastIpInPrefix.id
-							firewall.save()
-							interface=firewall.interfaces.get(name="ethernet1/7")
-						else:
-							interface=firewall.interfaces.get(name="ethernet1/3")
-					if "PUB-" in prefix.vlan.group.name:
-						interface=firewall.interfaces.get(name="ethernet1/5")
-					lastIpInPrefix.assigned_object = interface
-					lastIpInPrefix.save()
-					self.log_success(f"last ip is {lastIpInPrefix} assigned to {interface}")
+			site=firewall.site
+			prefixes=Prefix.objects.filter(site=site)
+			for prefix in prefixes:
+				allIps=prefix.get_child_ips()
+				lastIpInPrefix=allIps[len(allIps)-1]
+				lastIpInPrefix.snapshot()
+				if "PRIV-" in prefix.vlan.group.name:
+					if prefix.vlan.group.name == "PRIV-MGMT":
+						preLastIpInPrefix=allIps[len(allIps)-2]
+						preLastIpInPrefix.snapshot()
+						firewall.snapshot()
+						interface=firewall.interfaces.get(name="management")
+						preLastIpInPrefix.assigned_object = interface
+						preLastIpInPrefix.save()
+						firewall.oob_ip_id = preLastIpInPrefix.id
+						firewall.save()
+						interface=firewall.interfaces.get(name="ethernet1/7")
+					else:
+						interface=firewall.interfaces.get(name="ethernet1/3")
+				if "PUB-" in prefix.vlan.group.name:
+					interface=firewall.interfaces.get(name="ethernet1/5")
+				lastIpInPrefix.assigned_object = interface
+				lastIpInPrefix.save()
