@@ -77,7 +77,7 @@ class NewSite(Script):
     def run(self, data, commit):
 
         # Create the new site
-        if data['code_site'] != "":
+        if data['code_site']:
             site = Site(
                 name=data['code_site']+" - "+data['nom_du_site'],
                 slug=slugify(data['nom_du_site']),
@@ -94,7 +94,7 @@ class NewSite(Script):
         # Create L3 Equipement
         l3_role = DeviceRole.objects.get(name='Firewall')
 
-        if data['model_niveau3'] != "":
+        if data['model_niveau3']:
             firewall = Device(
                 device_type=data['model_niveau3'],
                 name=data['code_site']+"-FW01",
