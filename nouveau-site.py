@@ -4,7 +4,7 @@ from django.utils.text import slugify
 from dcim.choices import DeviceStatusChoices, SiteStatusChoices
 from dcim.models import Device, DeviceRole, DeviceType, Site, Region, Manufacturer
 from extras.choices import CustomFieldTypeChoices
-from ipam.models import VLAN
+from ipam.models import VLAN, Prefix, Role
 
 
 class NewSite(Script):
@@ -94,19 +94,16 @@ class NewSite(Script):
         firewall.full_clean()
         firewall.save()
         self.log_success(f"Created firewall: {firewall}")
-        # # Create access switches
-        # switch_role = DeviceRole.objects.get(name='Access Switch')
-        # for i in range(1, data['switch_count'] + 1):
-        #     switch = Device(
-        #         device_type=data['switch_model'],
-        #         name=f'{site.slug.upper()}-SW-{i}',
-        #         site=site,
-        #         status=DeviceStatusChoices.STATUS_PLANNED,
-        #         role=switch_role
-        #     )
-        #     switch.save()
-        #     self.log_success(f"Created new switch: {switch}")
 
+        # Create Prefixes
+        Prefix25Reserved=Prefix.objects.filter(role=Role.objects.get(name="Sites Distants - Infra Cible - 25").id)
+        list25AvailablePrefixes = []
+        for prefix in Prefix25Reserved:
+            availablePrefixes = prefix.get_available_prefixes()
+            for availablePrefix in availablePrefixes.iter_cidr():
+                list25AvailablePrefixes.append(availablePrefix.subnet(25))
+
+        return list25AvailablePrefixes
         # # Create routers
         # router_role = DeviceRole.objects.get(name='WAN Router')
         # for i in range(1, data['router_count'] + 1):
