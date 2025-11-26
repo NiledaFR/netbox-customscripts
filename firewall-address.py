@@ -21,4 +21,4 @@ class LinkFirewallToAddress(Script):
 					self.log_success(f"prefix found for site {site}: {prefix.prefix}")
 					allIps=prefix.get_child_ips()
 					lastIpInPrefix=allIps[len(allIps)-1]
-					self.log_success(f"prefix found for site {site}: {"last ip is {lastIpInPrefix}")
+					self.log_success(f"last ip is {lastIpInPrefix}")
