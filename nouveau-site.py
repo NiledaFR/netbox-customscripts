@@ -76,6 +76,7 @@ class NewSite(Script):
     def run(self, data, commit):
 
         # Create the new site
+        self.log_success(data['code_site'])
         if data['code_site'] != "":
             site = Site(
                 name=data['code_site']+" - "+data['nom_du_site'],
