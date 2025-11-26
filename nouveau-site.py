@@ -25,15 +25,15 @@ class NewSite(Script):
         description="Adresse postale du nouveau site"
     )
 
-    site_type = ChoiceVar(
-        description="Type de site",
-        model=CustomFieldTypeChoices
-    )
+    # site_type = ChoiceVar(
+    #     description="Type de site",
+    #     model=CustomFieldTypeChoices
+    # )
 
-    interco_type = ChoiceVar(
-        description="Type d'interco",
-        model=CustomFieldTypeChoices
-    )
+    # interco_type = ChoiceVar(
+    #     description="Type d'interco",
+    #     model=CustomFieldTypeChoices
+    # )
     
 
     def run(self, data, commit):
