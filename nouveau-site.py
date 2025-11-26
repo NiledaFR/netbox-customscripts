@@ -118,6 +118,7 @@ class NewSite(Script):
         nb_prefix=0
         for vlan in data['vlans_en_25']:
             self.log_success(f"Create prefix {list25AvailablePrefixes[nb_prefix]} for vlan {vlan}")
+            nb_prefix+=1
 
         
         # # Create routers
