@@ -61,15 +61,18 @@ class NewSite(Script):
 
     def run(self, data, commit):
 
-        self.log_success(f"OK")
-        # # Create the new site
-        # site = Site(
-        #     name=data['site_name'],
-        #     slug=slugify(data['site_name']),
-        #     status=SiteStatusChoices.STATUS_PLANNED
-        # )
-        # site.save()
-        # self.log_success(f"Created new site: {site}")
+        # Create the new site
+        site = Site(
+            name=data['nom_du_site'],
+            slug=slugify(data['nom_du_site']),
+            status='active',
+            region=data['affectation_du_site'],
+            physical_address=data['adresse_postale'],
+            cf_TYPE_DE_SITE=data['type_de_site'],
+            cf_TYPE_INTERCO=data['type_d_interco']
+        )
+        site.save()
+        self.log_success(f"Created new site: {site}")
 
         # # Create access switches
         # switch_role = DeviceRole.objects.get(name='Access Switch')
