@@ -69,10 +69,10 @@ class NewSite(Script):
             slug=slugify(data['nom_du_site']),
             status='active',
             region=data['affectation_du_site'],
-            physical_address=data['adresse_postale'],
-            cf_TYPE_DE_SITE=data['type_de_site'],
-            cf_TYPE_INTERCO=data['type_d_interco']
+            physical_address=data['adresse_postale']
         )
+        site.cf.update(cf_TYPE_DE_SITE=data['type_de_site'])
+        site.cf.update(cf_TYPE_INTERCO=data['type_d_interco'])
         site.save()
         self.log_success(f"Created new site: {site}")
 
