@@ -45,7 +45,7 @@ class NewSite(Script):
         description="Modèle du device de niveau 3",
         model=DeviceType,
         query_params={
-            'manufacturer_id': '$manufacturer'
+            'manufacturer_id': '$fabricant_niveau3'
         }
     )
 
