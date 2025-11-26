@@ -71,10 +71,11 @@ class NewSite(Script):
             region=data['affectation_du_site'],
             physical_address=data['adresse_postale']
         )
+        typedesite=data['type_de_site']
         site.cf.update(cf_TYPE_DE_SITE=data['type_de_site'])
         site.cf.update(cf_TYPE_INTERCO=data['type_d_interco'])
         site.save()
-        self.log_success(f"Created new site: {site}")
+        self.log_success(f"Created new site: {site}, avec comme type {typedesite}")
 
         # # Create access switches
         # switch_role = DeviceRole.objects.get(name='Access Switch')
