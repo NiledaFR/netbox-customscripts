@@ -2,7 +2,7 @@ from extras.scripts import *
 from django.utils.text import slugify
 from dcim.choices import DeviceStatusChoices, SiteStatusChoices
 from dcim.models import Device, DeviceRole, DeviceType, Site
-from ipam.models import IPAddress
+from ipam.models import IPAddress, Prefix
 
 
 class LinkFirewallToAddress(Script):
@@ -14,4 +14,5 @@ class LinkFirewallToAddress(Script):
         devicerole=DeviceRole.objects.filter(name="Firewall")[0]
         firewalls=Device.objects.filter(role=devicerole.id)
         for firewall in firewalls:
-            self.log_success(f"firewall found: {firewall.name},site {firewall.site}")
+            if firewall.name="ANA-FW01"
+                self.log_success(f"firewall found: {firewall.name},site {firewall.site}")
