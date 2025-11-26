@@ -114,7 +114,7 @@ class NewSite(Script):
             for availablePrefix in availablePrefixes.iter_cidrs():
                 list25AvailablePrefixes.append(list(availablePrefix.subnet(25)))
 
-        return list25AvailablePrefixes[0]
+        return str(list25AvailablePrefixes[0])
         # # Create routers
         # router_role = DeviceRole.objects.get(name='WAN Router')
         # for i in range(1, data['router_count'] + 1):
