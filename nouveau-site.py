@@ -35,12 +35,17 @@ class NewSite(Script):
         description="Type d'interco",
         choices=(('ROUTAGE','Routage'),('IPSEC','IPSec'),('L2','L2'))
     )
+
+    manufacturer = ObjectVar(
+        description="Fabricant du device de niveau 3",
+        model=Manufacturer
+    )
     
-    palo_model = ObjectVar(
-        description="Modèle de Palo",
+    l3_model = ObjectVar(
+        description="Modèle du device de niveau 3",
         model=DeviceType,
         query_params={
-            'manufacturer__name': 'Palo Alto'
+            'manufacturer_id': $manufacturer
         }
     )
 
