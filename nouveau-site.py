@@ -76,7 +76,7 @@ class NewSite(Script):
     def run(self, data, commit):
 
         # Create the new site
-        if data['code_site']:
+        if data['code_site'] != "":
             site = Site(
                 name=data['code_site']+" - "+data['nom_du_site'],
                 slug=slugify(data['nom_du_site']),
@@ -93,7 +93,7 @@ class NewSite(Script):
         # Create L3 Equipement
         l3_role = DeviceRole.objects.get(name='Firewall')
 
-        if data['model_niveau3']:
+        if data['model_niveau3'] != "":
             firewall = Device(
                 device_type=data['model_niveau3'],
                 name=data['code_site']+"-FW01",
@@ -111,9 +111,9 @@ class NewSite(Script):
         for prefix in Prefix25Reserved:
             availablePrefixes = prefix.get_available_prefixes()
             for availablePrefix in availablePrefixes.iter_cidrs():
-                list25AvailablePrefixes.append(availablePrefix.subnet(25))
+                list25AvailablePrefixes.append(list(availablePrefix.subnet(25))
 
-        return list25AvailablePrefixes
+        return '\n'.join(list25AvailablePrefixes)
         # # Create routers
         # router_role = DeviceRole.objects.get(name='WAN Router')
         # for i in range(1, data['router_count'] + 1):
