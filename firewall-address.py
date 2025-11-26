@@ -20,13 +20,15 @@ class LinkFirewallToAddress(Script):
 				for prefix in prefixes:
 					self.log_success(f"prefix found for site {site}: {prefix.prefix}")
 					self.log_success(f"vlan is: {prefix.vlan}")
-					if "PRIV-" in prefix.vlan.group.name:
-						if prefix.vlan.group.name == "PRIV-MGMT":
-							self.log_success(f"vlan group is: {prefix.vlan.group} on port ethernet1/7")
-						else:
-							self.log_success(f"vlan group is: {prefix.vlan.group} on port ethernet1/3")
-					if "PUB-" in prefix.vlan.group.name:
-						self.log_success(f"vlan group is: {prefix.vlan.group} on port ethernet1/5")
 					allIps=prefix.get_child_ips()
 					lastIpInPrefix=allIps[len(allIps)-1]
-					self.log_success(f"last ip is {lastIpInPrefix}")
+					if "PRIV-" in prefix.vlan.group.name:
+						if prefix.vlan.group.name == "PRIV-MGMT":
+							interface=firewall.interfaces.get(name="ethernet1/7")
+						else:
+							interface=firewall.interfaces.get(name="ethernet1/3")
+					if "PUB-" in prefix.vlan.group.name:
+						interface=firewall.interfaces.get(name="ethernet1/5")
+					lastIpInPrefix.assigned_obj = interface
+					lastIpInPrefix.save()
+					self.log_success(f"last ip is {lastIpInPrefix} assigned to {interface}")
