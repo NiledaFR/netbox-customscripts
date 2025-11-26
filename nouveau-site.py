@@ -13,6 +13,10 @@ class NewSite(Script):
         name = "Nouveau Site"
         description = "Permet de créer un nouveau site"
 
+    code_site = StringVar(
+        description="Code du nouveau site"
+    )
+
     nom_du_site = StringVar(
         description="Nom du nouveau site"
     )
@@ -65,7 +69,7 @@ class NewSite(Script):
 
         # Create the new site
         site = Site(
-            name=data['nom_du_site'],
+            name=data['code_site']+" - "+data['nom_du_site'],
             slug=slugify(data['nom_du_site']),
             status='active',
             region=data['affectation_du_site'],
@@ -77,6 +81,19 @@ class NewSite(Script):
         typedesite=site.cf.get('TYPE_INTERCO')
         self.log_success(f"Created new site: {site}, avec comme type {typedesite}")
 
+        # Create L3 Equipement
+        l3_role = DeviceRole.objects.get(name='Firewall')
+
+        firewall = Device(
+            device_type=data['model_niveau3'],
+            name=data['code_site']+"-FW01",
+            status='active',
+            role=l3_role,
+            site=site
+        )
+        firewall.full_clean()
+        firewall.save()
+        self.log_success(f"Created firewall: {firewall}")
         # # Create access switches
         # switch_role = DeviceRole.objects.get(name='Access Switch')
         # for i in range(1, data['switch_count'] + 1):
