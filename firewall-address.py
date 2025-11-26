@@ -29,6 +29,7 @@ class LinkFirewallToAddress(Script):
 							preLastIpInPrefix.assigned_object = interface
 							preLastIpInPrefix.save()
 							firewall.oob_ip_id = preLastIpInPrefix.id
+							firewall.save()
 							interface=firewall.interfaces.get(name="ethernet1/7")
 						else:
 							interface=firewall.interfaces.get(name="ethernet1/3")
