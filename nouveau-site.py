@@ -312,7 +312,7 @@ class AddVLANToSite(Script):
         # On créé également une adresse IP pour le FW et on l'affecte à une de ses interfaces suivant le cas (PUB, PRIV ou MGMT)
         for vlan in data['vlans_en_25']:
             if vlan in vlan_in_site:
-                self.log_error(f"Le VLAN {vlan} existe déjà")
+                self.log_failure(f"Le VLAN {vlan} existe déjà")
             else:
                 # Création du préfixe
                 vlanNameArray=vlan.name.lower().split('-',1)
@@ -391,7 +391,7 @@ class AddVLANToSite(Script):
         # On créé également une adresse IP pour le FW et on l'affecte à une de ses interfaces suivant le cas (PUB, PRIV ou MGMT)
         for vlan in data['vlans_en_23']:
             if vlan in vlan_in_site:
-                self.log_error(f"Le VLAN {vlan} existe déjà")
+                self.log_failure(f"Le VLAN {vlan} existe déjà")
             else:
                 # Création du préfixe
                 vlanNameArray=vlan.name.lower().split('-',1)
