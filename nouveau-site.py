@@ -117,7 +117,7 @@ class NewSite(Script):
         for vlan in data['vlans_en_25']:
             vlanNameArray=vlan.name.lower().split('-',1)
             codeSite=data['code_site'].lower()
-            prefixNew=Prefix(
+            prefix=Prefix(
                 scope_id=site.id,
                 prefix=list25AvailablePrefixes[nb_prefix],
                 status='active',
@@ -125,8 +125,35 @@ class NewSite(Script):
                 scope_type=ObjectType.objects.get(app_label='dcim',model='site'),
                 description='lan_'+vlanNameArray[0]+'_'+codeSite+'-'+vlanNameArray[1]
             )
-            prefixNew.full_clean()
-            prefixNew.save()
+            prefix.full_clean()
+            prefix.save()
+            lastIpInPrefix=(prefix.prefix.broadcast-1).format()+"/"+str(prefix.mask_length)
+
+            lastIpInPrefix=IPAddress(address=lastIpInPrefix, status="active", dns_name=firewall.name, description=firewall.device_type.model)
+            lastIpInPrefix.full_clean()
+            lastIpInPrefix.save()
+
+            if "PRIV-" in prefix.vlan.group.name:
+                    if prefix.vlan.group.name == "PRIV-MGMT":
+                        preLastIpInPrefix=(prefix.prefix.broadcast-2).format()+"/"+str(prefix.mask_length)
+                        preLastIpInPrefix=IPAddress(address=preLastIpInPrefix, status="active", dns_name=firewall.name+"-oob", description=firewall.device_type.model)
+                        preLastIpInPrefix.full_clean()
+                        preLastIpInPrefix.save()
+                        preLastIpInPrefix.snapshot()
+                        firewall.snapshot()
+                        interface=firewall.interfaces.get(name="management")
+                        preLastIpInPrefix.assigned_object = interface
+                        preLastIpInPrefix.save()
+                        firewall.oob_ip_id = preLastIpInPrefix.id
+                        firewall.save()
+                        interface=firewall.interfaces.get(name="ethernet1/7")
+                    else:
+                        interface=firewall.interfaces.get(name="ethernet1/3")
+                if "PUB-" in prefix.vlan.group.name:
+                    interface=firewall.interfaces.get(name="ethernet1/5")
+                lastIpInPrefix.assigned_object = interface
+                lastIpInPrefix.save()
+
             self.log_success(f"Create prefix {list25AvailablePrefixes[nb_prefix]} for vlan {vlan}")
             nb_prefix+=1
 
