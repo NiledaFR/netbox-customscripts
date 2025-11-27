@@ -2,7 +2,7 @@ from extras.scripts import *
 from django.utils.text import slugify
 from ipam.models import VLAN, Prefix, Role, IPAddress
 
-class AvailablePrefix():
+class AvailablePrefixes():
   prefixes = ""
   subnet = ""
   def __init__(self, *args, **kwargs):
