@@ -280,6 +280,15 @@ class AddVLANToSite(Script):
 
         # Affectation du site à une variable
         site=data['site']
+
+        # Récupération des prefixes pour récupération des VLANs déjà affectés
+        existing_prefixes_in_site=site.prefixes.all()
+
+        # Création de la liste des VLANs existant
+        vlan_in_site=[]
+        for prefix in existing_prefixes_in_site:
+            vlan_in_site.append(prefix.vlan)
+
         # Récupération du firewall du site
         firewall=site.devices.get(role=DeviceRole.objects.get(name='Firewall').id)
 
@@ -302,65 +311,67 @@ class AddVLANToSite(Script):
         # On parcours les VLANs désigné dans l'interface web puis on créé un préfix pour chacun
         # On créé également une adresse IP pour le FW et on l'affecte à une de ses interfaces suivant le cas (PUB, PRIV ou MGMT)
         for vlan in data['vlans_en_25']:
+            if vlan in vlan_in_site:
+                self.log_error(f"Le VLAN {vlan} existe déjà")
+            else:
+                # Création du préfixe
+                vlanNameArray=vlan.name.lower().split('-',1)
+                codeSite=site.name.split(' - ')[0].lower()
+                prefix=Prefix(
+                    scope_id=site.id,
+                    prefix=list25AvailablePrefixes[nb_prefix],
+                    status='active',
+                    vlan=vlan,
+                    scope_type=ObjectType.objects.get(app_label='dcim',model='site'),
+                    description='lan_'+vlanNameArray[0]+'_'+codeSite+'-'+vlanNameArray[1]
+                )
+                prefix.full_clean()
+                prefix.save()
 
-            # Création du préfixe
-            vlanNameArray=vlan.name.lower().split('-',1)
-            codeSite=site.name.split(' - ')[0].lower()
-            prefix=Prefix(
-                scope_id=site.id,
-                prefix=list25AvailablePrefixes[nb_prefix],
-                status='active',
-                vlan=vlan,
-                scope_type=ObjectType.objects.get(app_label='dcim',model='site'),
-                description='lan_'+vlanNameArray[0]+'_'+codeSite+'-'+vlanNameArray[1]
-            )
-            prefix.full_clean()
-            prefix.save()
+                # Récupération de la dernière IP du préfixe pour affectation au palo
+                lastIpInPrefix=(prefix.prefix.broadcast-1).format()+"/"+str(prefix.mask_length)
 
-            # Récupération de la dernière IP du préfixe pour affectation au palo
-            lastIpInPrefix=(prefix.prefix.broadcast-1).format()+"/"+str(prefix.mask_length)
+                # Création de cette dernière IP
+                lastIpInPrefix=IPAddress(address=lastIpInPrefix, status="active", dns_name=firewall.name.replace('-',''), description=firewall.device_type.model)
+                lastIpInPrefix.full_clean()
+                lastIpInPrefix.save()
 
-            # Création de cette dernière IP
-            lastIpInPrefix=IPAddress(address=lastIpInPrefix, status="active", dns_name=firewall.name.replace('-',''), description=firewall.device_type.model)
-            lastIpInPrefix.full_clean()
-            lastIpInPrefix.save()
+                if "PRIV-" in prefix.vlan.group.name:
+                    # Si on est dans le VLAN PRIV-MGMT, on créé aussi l'avant dernière IP pour le OOB du Palo
+                    # Sinon on affecte l'adresse IP à ethernet1/7 pour le PRIV
+                    if prefix.vlan.group.name == "PRIV-MGMT":
+                        # Création de l'avant dernière IP
+                        preLastIpInPrefix=(prefix.prefix.broadcast-2).format()+"/"+str(prefix.mask_length)
+                        preLastIpInPrefix=IPAddress(address=preLastIpInPrefix, status="active", dns_name=firewall.name.replace('-','')+"-oob", description=firewall.device_type.model)
+                        preLastIpInPrefix.full_clean()
+                        preLastIpInPrefix.save()
+                        preLastIpInPrefix.snapshot()
+                        firewall.snapshot()
+                        # Affectation de l'avant-dernière IP au port management du Firewall et définition de celle-ci comme OOB
+                        interface=firewall.interfaces.get(name="management")
+                        preLastIpInPrefix.assigned_object = interface
+                        preLastIpInPrefix.save()
+                        firewall.oob_ip_id = preLastIpInPrefix.id
+                        firewall.save()
 
-            if "PRIV-" in prefix.vlan.group.name:
-                # Si on est dans le VLAN PRIV-MGMT, on créé aussi l'avant dernière IP pour le OOB du Palo
-                # Sinon on affecte l'adresse IP à ethernet1/7 pour le PRIV
-                if prefix.vlan.group.name == "PRIV-MGMT":
-                    # Création de l'avant dernière IP
-                    preLastIpInPrefix=(prefix.prefix.broadcast-2).format()+"/"+str(prefix.mask_length)
-                    preLastIpInPrefix=IPAddress(address=preLastIpInPrefix, status="active", dns_name=firewall.name.replace('-','')+"-oob", description=firewall.device_type.model)
-                    preLastIpInPrefix.full_clean()
-                    preLastIpInPrefix.save()
-                    preLastIpInPrefix.snapshot()
-                    firewall.snapshot()
-                    # Affectation de l'avant-dernière IP au port management du Firewall et définition de celle-ci comme OOB
-                    interface=firewall.interfaces.get(name="management")
-                    preLastIpInPrefix.assigned_object = interface
-                    preLastIpInPrefix.save()
-                    firewall.oob_ip_id = preLastIpInPrefix.id
-                    firewall.save()
+                        # Affectation de l'adresse IP au port 1/7 du palo
+                        interface=firewall.interfaces.get(name="ethernet1/7")
+                    else:
+                        # Si hors du management, on ne fait que l'affectation au port 1/3
+                        interface=firewall.interfaces.get(name="ethernet1/3")
+                # Si le vlan fait parti du groupe PUB, c'est que l'IP est affectée à l'interface 1/5
+                if "PUB-" in prefix.vlan.group.name:
+                    interface=firewall.interfaces.get(name="ethernet1/5")
 
-                    # Affectation de l'adresse IP au port 1/7 du palo
-                    interface=firewall.interfaces.get(name="ethernet1/7")
-                else:
-                    # Si hors du management, on ne fait que l'affectation au port 1/3
-                    interface=firewall.interfaces.get(name="ethernet1/3")
-            # Si le vlan fait parti du groupe PUB, c'est que l'IP est affectée à l'interface 1/5
-            if "PUB-" in prefix.vlan.group.name:
-                interface=firewall.interfaces.get(name="ethernet1/5")
+                # Liaison de l'IP au firewall
+                lastIpInPrefix.assigned_object = interface
+                lastIpInPrefix.save()
 
-            # Liaison de l'IP au firewall
-            lastIpInPrefix.assigned_object = interface
-            lastIpInPrefix.save()
+                # On log la création du préfix pour le VLAN
+                self.log_success(f"Create prefix {list25AvailablePrefixes[nb_prefix]} for vlan {vlan}")
 
-            # On log la création du préfix pour le VLAN
-            self.log_success(f"Create prefix {list25AvailablePrefixes[nb_prefix]} for vlan {vlan}")
-
-            # On incrémente la variable de positionnement dans le tableau
-            nb_prefix+=1
+                # On incrémente la variable de positionnement dans le tableau
+                nb_prefix+=1
 
         # Récupération des préfixes dispo sur les plages réservée en /23
         Prefix23Reserved=Prefix.objects.filter(role=Role.objects.get(name="Sites Distants - Infra Cible - 23").id)
@@ -379,63 +390,65 @@ class AddVLANToSite(Script):
         # On parcours les VLANs désigné dans l'interface web puis on créé un préfix pour chacun
         # On créé également une adresse IP pour le FW et on l'affecte à une de ses interfaces suivant le cas (PUB, PRIV ou MGMT)
         for vlan in data['vlans_en_23']:
+            if vlan in vlan_in_site:
+                self.log_error(f"Le VLAN {vlan} existe déjà")
+            else:
+                # Création du préfixe
+                vlanNameArray=vlan.name.lower().split('-',1)
+                codeSite=site.name.split(' - ')[0].lower()
+                prefix=Prefix(
+                    scope_id=site.id,
+                    prefix=list23AvailablePrefixes[len(list23AvailablePrefixes)-1-nb_prefix],
+                    status='active',
+                    vlan=vlan,
+                    scope_type=ObjectType.objects.get(app_label='dcim',model='site'),
+                    description='lan_'+vlanNameArray[0]+'_'+codeSite+'-'+vlanNameArray[1]
+                )
+                prefix.full_clean()
+                prefix.save()
 
-            # Création du préfixe
-            vlanNameArray=vlan.name.lower().split('-',1)
-            codeSite=site.name.split(' - ')[0].lower()
-            prefix=Prefix(
-                scope_id=site.id,
-                prefix=list23AvailablePrefixes[len(list23AvailablePrefixes)-1-nb_prefix],
-                status='active',
-                vlan=vlan,
-                scope_type=ObjectType.objects.get(app_label='dcim',model='site'),
-                description='lan_'+vlanNameArray[0]+'_'+codeSite+'-'+vlanNameArray[1]
-            )
-            prefix.full_clean()
-            prefix.save()
+                # Récupération de la dernière IP du préfixe pour affectation au palo
+                lastIpInPrefix=(prefix.prefix.broadcast-1).format()+"/"+str(prefix.mask_length)
 
-            # Récupération de la dernière IP du préfixe pour affectation au palo
-            lastIpInPrefix=(prefix.prefix.broadcast-1).format()+"/"+str(prefix.mask_length)
+                # Création de cette dernière IP
+                lastIpInPrefix=IPAddress(address=lastIpInPrefix, status="active", dns_name=firewall.name.replace('-',''), description=firewall.device_type.model)
+                lastIpInPrefix.full_clean()
+                lastIpInPrefix.save()
 
-            # Création de cette dernière IP
-            lastIpInPrefix=IPAddress(address=lastIpInPrefix, status="active", dns_name=firewall.name.replace('-',''), description=firewall.device_type.model)
-            lastIpInPrefix.full_clean()
-            lastIpInPrefix.save()
+                if "PRIV-" in prefix.vlan.group.name:
+                    # Si on est dans le VLAN PRIV-MGMT, on créé aussi l'avant dernière IP pour le OOB du Palo
+                    # Sinon on affecte l'adresse IP à ethernet1/7 pour le PRIV
+                    if prefix.vlan.group.name == "PRIV-MGMT":
+                        # Création de l'avant dernière IP
+                        preLastIpInPrefix=(prefix.prefix.broadcast-2).format()+"/"+str(prefix.mask_length)
+                        preLastIpInPrefix=IPAddress(address=preLastIpInPrefix, status="active", dns_name=firewall.name.replace('-','')+"-oob", description=firewall.device_type.model)
+                        preLastIpInPrefix.full_clean()
+                        preLastIpInPrefix.save()
+                        preLastIpInPrefix.snapshot()
+                        firewall.snapshot()
+                        # Affectation de l'avant-dernière IP au port management du Firewall et définition de celle-ci comme OOB
+                        interface=firewall.interfaces.get(name="management")
+                        preLastIpInPrefix.assigned_object = interface
+                        preLastIpInPrefix.save()
+                        firewall.oob_ip_id = preLastIpInPrefix.id
+                        firewall.save()
 
-            if "PRIV-" in prefix.vlan.group.name:
-                # Si on est dans le VLAN PRIV-MGMT, on créé aussi l'avant dernière IP pour le OOB du Palo
-                # Sinon on affecte l'adresse IP à ethernet1/7 pour le PRIV
-                if prefix.vlan.group.name == "PRIV-MGMT":
-                    # Création de l'avant dernière IP
-                    preLastIpInPrefix=(prefix.prefix.broadcast-2).format()+"/"+str(prefix.mask_length)
-                    preLastIpInPrefix=IPAddress(address=preLastIpInPrefix, status="active", dns_name=firewall.name.replace('-','')+"-oob", description=firewall.device_type.model)
-                    preLastIpInPrefix.full_clean()
-                    preLastIpInPrefix.save()
-                    preLastIpInPrefix.snapshot()
-                    firewall.snapshot()
-                    # Affectation de l'avant-dernière IP au port management du Firewall et définition de celle-ci comme OOB
-                    interface=firewall.interfaces.get(name="management")
-                    preLastIpInPrefix.assigned_object = interface
-                    preLastIpInPrefix.save()
-                    firewall.oob_ip_id = preLastIpInPrefix.id
-                    firewall.save()
+                        # Affectation de l'adresse IP au port 1/7 du palo
+                        interface=firewall.interfaces.get(name="ethernet1/7")
+                    else:
+                        # Si hors du management, on ne fait que l'affectation au port 1/3
+                        interface=firewall.interfaces.get(name="ethernet1/3")
+                # Si le vlan fait parti du groupe PUB, c'est que l'IP est affectée à l'interface 1/5
+                if "PUB-" in prefix.vlan.group.name:
+                    interface=firewall.interfaces.get(name="ethernet1/5")
 
-                    # Affectation de l'adresse IP au port 1/7 du palo
-                    interface=firewall.interfaces.get(name="ethernet1/7")
-                else:
-                    # Si hors du management, on ne fait que l'affectation au port 1/3
-                    interface=firewall.interfaces.get(name="ethernet1/3")
-            # Si le vlan fait parti du groupe PUB, c'est que l'IP est affectée à l'interface 1/5
-            if "PUB-" in prefix.vlan.group.name:
-                interface=firewall.interfaces.get(name="ethernet1/5")
+                # Liaison de l'IP au firewall
+                lastIpInPrefix.assigned_object = interface
+                lastIpInPrefix.save()
 
-            # Liaison de l'IP au firewall
-            lastIpInPrefix.assigned_object = interface
-            lastIpInPrefix.save()
+                # On log la création du préfix pour le VLAN
+                self.log_success(f"Create prefix {list23AvailablePrefixes[len(list23AvailablePrefixes)-1-nb_prefix]} for vlan {vlan}")
 
-            # On log la création du préfix pour le VLAN
-            self.log_success(f"Create prefix {list23AvailablePrefixes[len(list23AvailablePrefixes)-1-nb_prefix]} for vlan {vlan}")
-
-            # On incrémente la variable de positionnement dans le tableau
-            nb_prefix+=1
+                # On incrémente la variable de positionnement dans le tableau
+                nb_prefix+=1
     
