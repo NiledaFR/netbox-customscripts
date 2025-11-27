@@ -257,7 +257,7 @@ class AddVLANToSite(Script):
 
     class Meta:
         name = "Ajout de VLAN à un site"
-        description = "Permet de créer un nouveau site"
+        description = "Permet d'ajouter un VLAN à un site sur le nouveau plan d'adressage"
 
     site = ObjectVar(
         description="Fabricant du device de niveau 3",
