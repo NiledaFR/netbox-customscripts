@@ -7,6 +7,8 @@ from extras.choices import CustomFieldTypeChoices
 from ipam.models import VLAN, Prefix, Role, IPAddress
 from core.models import ObjectType
 
+from nileda-utils import AvailablePrefixes
+
 
 class NewSite(Script):
 
