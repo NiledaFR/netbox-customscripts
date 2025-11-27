@@ -267,8 +267,9 @@ class AddVLANToSite(Script):
     vlans_en_25 = MultiObjectVar(
         description="VLAN avec un subnet en 25",
         model=VLAN,
-        required=False
-    ).field_attrs.update(queryset=VLAN.objects.all())
+        required=False,
+        queryset=VLAN.objects.all()
+    )
 
     vlans_en_23 = MultiObjectVar(
         description="VLAN avec un subnet en 23",
