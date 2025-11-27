@@ -76,35 +76,32 @@ class NewSite(Script):
     def run(self, data, commit):
 
         # Create the new site
-        self.log_success(data['code_site'])
-        if data['code_site'] != "":
-            site = Site(
-                name=data['code_site']+" - "+data['nom_du_site'],
-                slug=slugify(data['nom_du_site']),
-                status='active',
-                region=data['affectation_du_site'],
-                physical_address=data['adresse_postale'],
-                custom_field_data=dict(TYPE_DE_SITE=data['type_de_site'],TYPE_INTERCO=data['type_d_interco'])
-            )
-            site.full_clean()
-            site.save()
-            typedesite=site.cf.get('TYPE_INTERCO')
-            self.log_success(f"Created new site: {site}, avec comme type {typedesite}")
+        site = Site(
+            name=data['code_site']+" - "+data['nom_du_site'],
+            slug=slugify(data['nom_du_site']),
+            status='active',
+            region=data['affectation_du_site'],
+            physical_address=data['adresse_postale'],
+            custom_field_data=dict(TYPE_DE_SITE=data['type_de_site'],TYPE_INTERCO=data['type_d_interco'])
+        )
+        site.full_clean()
+        site.save()
+        typedesite=site.cf.get('TYPE_INTERCO')
+        self.log_success(f"Created new site: {site}, avec comme type {typedesite}")
 
-            # Create L3 Equipement
-            l3_role = DeviceRole.objects.get(name='Firewall')
+        # Create L3 Equipement
+        l3_role = DeviceRole.objects.get(name='Firewall')
 
-            if data['model_niveau3'] != "":
-                firewall = Device(
-                    device_type=data['model_niveau3'],
-                    name=data['code_site']+"-FW01",
-                    status='active',
-                    role=l3_role,
-                    site=site
-                )
-                firewall.full_clean()
-                firewall.save()
-                self.log_success(f"Created firewall: {firewall}")
+        firewall = Device(
+            device_type=data['model_niveau3'],
+            name=data['code_site']+"-FW01",
+            status='active',
+            role=l3_role,
+            site=site
+        )
+        firewall.full_clean()
+        firewall.save()
+        self.log_success(f"Created firewall: {firewall}")
 
         # Create Prefixes
         Prefix25Reserved=Prefix.objects.filter(role=Role.objects.get(name="Sites Distants - Infra Cible - 25").id)
@@ -117,6 +114,15 @@ class NewSite(Script):
 
         nb_prefix=0
         for vlan in data['vlans_en_25']:
+            prefixNew=Prefix(
+                scope_id=site.id,
+                prefix=list25AvailablePrefixes[0],
+                status='active',
+                vlan=vlan,
+                scope_type=core.ObjectType.objects.get(app_label='dcim',model='site')
+            )
+            prefixNew.full_clean()
+            prefixNew.save()
             self.log_success(f"Create prefix {list25AvailablePrefixes[nb_prefix]} for vlan {vlan}")
             nb_prefix+=1
 
