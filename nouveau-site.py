@@ -115,12 +115,14 @@ class NewSite(Script):
 
         nb_prefix=0
         for vlan in data['vlans_en_25']:
+            vlanNameArray=vlan.name.lower().split('-',1)
             prefixNew=Prefix(
                 scope_id=site.id,
                 prefix=list25AvailablePrefixes[nb_prefix],
                 status='active',
                 vlan=vlan,
-                scope_type=ObjectType.objects.get(app_label='dcim',model='site')
+                scope_type=ObjectType.objects.get(app_label='dcim',model='site'),
+                description='lan_'+vlanNameArray[0]+'_'+data['code_site'].lower+'-'+vlanNameArray[1]
             )
             prefixNew.full_clean()
             prefixNew.save()
