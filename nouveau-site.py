@@ -117,7 +117,7 @@ class NewSite(Script):
         for vlan in data['vlans_en_25']:
             prefixNew=Prefix(
                 scope_id=site.id,
-                prefix=list25AvailablePrefixes[0],
+                prefix=list25AvailablePrefixes[nb_prefix],
                 status='active',
                 vlan=vlan,
                 scope_type=ObjectType.objects.get(app_label='dcim',model='site')
