@@ -136,7 +136,7 @@ class NewSite(Script):
             lastIpInPrefix=(prefix.prefix.broadcast-1).format()+"/"+str(prefix.mask_length)
 
             # Création de cette dernière IP
-            lastIpInPrefix=IPAddress(address=lastIpInPrefix, status="active", dns_name=firewall.name, description=firewall.device_type.model)
+            lastIpInPrefix=IPAddress(address=lastIpInPrefix, status="active", dns_name=firewall.name.replace('-',''), description=firewall.device_type.model)
             lastIpInPrefix.full_clean()
             lastIpInPrefix.save()
 
@@ -146,7 +146,7 @@ class NewSite(Script):
                 if prefix.vlan.group.name == "PRIV-MGMT":
                     # Création de l'avant dernière IP
                     preLastIpInPrefix=(prefix.prefix.broadcast-2).format()+"/"+str(prefix.mask_length)
-                    preLastIpInPrefix=IPAddress(address=preLastIpInPrefix, status="active", dns_name=firewall.name+"-oob", description=firewall.device_type.model)
+                    preLastIpInPrefix=IPAddress(address=preLastIpInPrefix, status="active", dns_name=firewall.name.replace('-','')+"-oob", description=firewall.device_type.model)
                     preLastIpInPrefix.full_clean()
                     preLastIpInPrefix.save()
                     preLastIpInPrefix.snapshot()
@@ -213,7 +213,7 @@ class NewSite(Script):
             lastIpInPrefix=(prefix.prefix.broadcast-1).format()+"/"+str(prefix.mask_length)
 
             # Création de cette dernière IP
-            lastIpInPrefix=IPAddress(address=lastIpInPrefix, status="active", dns_name=firewall.name, description=firewall.device_type.model)
+            lastIpInPrefix=IPAddress(address=lastIpInPrefix, status="active", dns_name=firewall.name.replace('-',''), description=firewall.device_type.model)
             lastIpInPrefix.full_clean()
             lastIpInPrefix.save()
 
@@ -223,7 +223,7 @@ class NewSite(Script):
                 if prefix.vlan.group.name == "PRIV-MGMT":
                     # Création de l'avant dernière IP
                     preLastIpInPrefix=(prefix.prefix.broadcast-2).format()+"/"+str(prefix.mask_length)
-                    preLastIpInPrefix=IPAddress(address=preLastIpInPrefix, status="active", dns_name=firewall.name+"-oob", description=firewall.device_type.model)
+                    preLastIpInPrefix=IPAddress(address=preLastIpInPrefix, status="active", dns_name=firewall.name.replace('-','')+"-oob", description=firewall.device_type.model)
                     preLastIpInPrefix.full_clean()
                     preLastIpInPrefix.save()
                     preLastIpInPrefix.snapshot()
