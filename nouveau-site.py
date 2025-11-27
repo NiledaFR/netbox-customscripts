@@ -120,7 +120,7 @@ class NewSite(Script):
                 prefix=list25AvailablePrefixes[0],
                 status='active',
                 vlan=vlan,
-                scope_type=core.ObjectType.objects.get(app_label='dcim',model='site')
+                scope_type=ObjectType.objects.get(app_label='dcim',model='site')
             )
             prefixNew.full_clean()
             prefixNew.save()
