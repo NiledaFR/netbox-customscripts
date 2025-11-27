@@ -5,6 +5,7 @@ from dcim.choices import DeviceStatusChoices, SiteStatusChoices
 from dcim.models import Device, DeviceRole, DeviceType, Site, Region, Manufacturer
 from extras.choices import CustomFieldTypeChoices
 from ipam.models import VLAN, Prefix, Role
+from core.models import ObjectType
 
 
 class NewSite(Script):
